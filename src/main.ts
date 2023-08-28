@@ -17,7 +17,7 @@ async function bootstrap() {
     app.useStaticAssets(join(__dirname, '..', 'public'));
     app.setBaseViewsDir(join(__dirname, '..', 'views'));
     app.setViewEngine('hbs');
-    //
+    console.log(`Env Port: ${process.env.PORT}`);
     await app.listen(process.env.PORT || 3000);
     if (module.hot) {
         console.log("Accepting...")
