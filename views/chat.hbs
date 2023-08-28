@@ -22,7 +22,7 @@
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
     <script>
-        const socket = io('http://localhost:3000', {path: '/chat/socket-io'});
+        const socket = io(window.location.host, {path: '/chat/socket-io'});
         socket.on("connection", socket =>{
             socket.join('default');
         })

@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { join } from 'path';
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { ChatModule } from './chat/chat.module';
+import { RedisIoAdapter } from './redis-io-adapter';
 
 declare const module: any;
 async function bootstrap() {
@@ -9,15 +10,19 @@ async function bootstrap() {
     // if(module.hot){
     //     app.getHttpServer().
     // }
+    const redisIoAdapter = new RedisIoAdapter(app);
+    await redisIoAdapter.connectToRedis();
+
+    app.useWebSocketAdapter(redisIoAdapter);
     app.useStaticAssets(join(__dirname, '..', 'public'));
-    app.setBaseViewsDir(join(__dirname,'..', 'views'));
+    app.setBaseViewsDir(join(__dirname, '..', 'views'));
     app.setViewEngine('hbs');
     //
-    await app.listen(3000);
-    if(module.hot){
+    await app.listen(process.env.PORT || 3000);
+    if (module.hot) {
         console.log("Accepting...")
         module.hot.accept();
-        module.hot.dispose(()=> app.close());
+        module.hot.dispose(() => app.close());
     }
 }
 bootstrap();
