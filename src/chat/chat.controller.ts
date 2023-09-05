@@ -1,13 +1,13 @@
-import { Controller, Get, Param, Post, Render } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Render } from '@nestjs/common';
 import { ChatService } from './chat.service';
 
 @Controller('/chat')
 export class ChatController {
     constructor(private readonly service: ChatService) { }
 
-    @Get('/rooms/:roomId')
+    @Get('/')
     @Render('chat')
-    chat(@Param('roomId') roomId: string) {
+    chat(@Query('roomId') roomId: string) {
         return {
             roomId: roomId
         };
@@ -19,9 +19,11 @@ export class ChatController {
         return { rooms: await this.service.chatRoomList() };
     }
 
-    @Post('/rooms/:roomId')
-    async create_chat_room(@Param('roomId') roomId: string) {
+    @Post('/rooms')
+    @Render('room-item')
+    async create_chat_room(@Body('roomId') roomId: string) {
         await this.service.createRoom(roomId);
+        return { roomId };
         
     }
 
