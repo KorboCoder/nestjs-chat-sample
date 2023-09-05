@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Render } from '@nestjs/common';
+import { Controller, Get, Param, Post, Render } from '@nestjs/common';
 import { ChatService } from './chat.service';
 
 @Controller('/chat')
@@ -15,8 +15,14 @@ export class ChatController {
 
     @Get('/rooms')
     @Render('rooms')
-    chat_room_list() {
-        return { rooms: this.service.chatRoomList() };
+    async chat_room_list() {
+        return { rooms: await this.service.chatRoomList() };
+    }
+
+    @Post('/rooms/:roomId')
+    async create_chat_room(@Param('roomId') roomId: string) {
+        await this.service.createRoom(roomId);
+        
     }
 
 }

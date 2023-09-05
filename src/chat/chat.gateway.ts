@@ -1,6 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from "@nestjs/websockets";
+import { MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
+import { ChatService } from "./chat.service";
 
 class Message {
     body: string;
@@ -14,17 +15,22 @@ class Message {
     },
     path: '/chat/socket-io'
 })
-export class ChatGateway  implements OnGatewayConnection{
+export class ChatGateway implements OnGatewayConnection {
 
     @WebSocketServer()
     server: Server;
 
     //add a logger
     private logger: Logger = new Logger('ChatGateway');
+    constructor(
+        private service: ChatService
+    ) {
+    }
 
-    handleConnection(client: Socket) {
+    async handleConnection(client: Socket) {
         const roomId = client.handshake.query.roomId as string
         this.logger.log(`Client connected: ${client.id} | Joining: ${roomId}`);
+        await this.service.createRoom(roomId);
         client.join(roomId);
     }
 
@@ -35,7 +41,7 @@ export class ChatGateway  implements OnGatewayConnection{
         this.logger.log("Received Message: " + message.body);
     }
 
-    getRooms(){
+    getRooms() {
         return this.server.sockets.adapter.rooms;
     }
 

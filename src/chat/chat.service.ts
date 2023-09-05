@@ -1,21 +1,23 @@
 import { Injectable } from "@nestjs/common";
-import { ChatGateway } from "./chat.gateway";
+import { InjectRedis } from "@songkeys/nestjs-redis";
+import Redis from "ioredis";
 
 const CHAT_ROOM_KEY = 'chat_room'
 
 @Injectable()
 export class ChatService {
 
-
     constructor(
-        private gateway: ChatGateway,
+        @InjectRedis() private readonly redis: Redis
     ) { }
 
-    chatRoomList(): string[]{
-        let rooms: string[] = [];
-        for(let room of this.gateway.getRooms().keys()){
-            rooms.push(room);
-        }
+    async createRoom(roomId: string) {
+        return await this.redis.set(`${CHAT_ROOM_KEY}:${roomId}`, '{}' );
+    }
+
+    async chatRoomList(): Promise<string[]>{
+        let rooms: string[] = await this.redis.keys(`${CHAT_ROOM_KEY}:*`);
+        rooms = rooms.map(room => room.replace(`${CHAT_ROOM_KEY}:`, ''));
         return rooms;
     }
 
