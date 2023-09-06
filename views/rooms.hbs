@@ -58,6 +58,11 @@
         .sidebar div {
           display: block;
         }
+        #server-id {
+            position: absolute;
+            bottom: 0;
+            left: 0 ;
+        }
     </style>
     <body>
         <div class="sidebar">
@@ -77,6 +82,9 @@
                 <option value="{{this}}" id="room-item"> {{this}} </option>
                 {{/each}}
             </select>
+        </div>
+        <div id="server-id">
+            <b>Pod Id:</b> {{serverId}}
         </div>
         <div 
             class="chat-room" id="chat-room"

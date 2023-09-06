@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { RedisModule } from '@songkeys/nestjs-redis';
 import { Effect } from 'effect';
 import { ChatService } from './chat.service';
+import { AppController } from './app.controller';
 
 @Module({
     imports: [
@@ -16,19 +17,20 @@ import { ChatService } from './chat.service';
         RedisModule.forRoot({
             config: {
                 host: process.env.REDIS_HOST,
+                password: process.env.REDIS_PASSWORD,
                 port: Effect.runSync(
-                        Effect.try(
-                            () => parseInt(process.env.REDIS_PORT),
-                        )
-                        .pipe(Effect.orElseSucceed(()=>{return 6379;}))
+                    Effect.try(
+                        () => parseInt(process.env.REDIS_PORT),
                     )
+                        .pipe(Effect.orElseSucceed(() => { return 6379; }))
+                )
             }
 
         })
 
     ],
     providers: [ChatGateway, ChatService],
-    controllers: [ChatController],
+    controllers: [AppController, ChatController],
 
 })
 export class ChatModule { }

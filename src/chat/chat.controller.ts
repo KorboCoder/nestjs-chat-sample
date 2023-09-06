@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Render } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Render } from '@nestjs/common';
 import { ChatService } from './chat.service';
 
 @Controller('/chat')
@@ -16,7 +16,19 @@ export class ChatController {
     @Get('/rooms')
     @Render('rooms')
     async chat_room_list() {
-        return { rooms: await this.service.chatRoomList() };
+        let serverId: string;
+        if (process.env.HOSTNAME) {
+            serverId = process.env.HOSTNAME;
+            serverId = serverId.slice(serverId.length - 5);
+        }
+        else {
+            serverId = "No Pod Id"
+        }
+
+        return {
+            serverId,
+            rooms: await this.service.chatRoomList()
+        };
     }
 
     @Post('/rooms')
@@ -24,7 +36,7 @@ export class ChatController {
     async create_chat_room(@Body('roomId') roomId: string) {
         await this.service.createRoom(roomId);
         return { roomId };
-        
+
     }
 
 }

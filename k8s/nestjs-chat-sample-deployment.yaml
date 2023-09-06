@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nestjs-chat-sample-deployment
+  labels:
+    app: nestjs-chat-sample
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nestjs-chat-sample
+  template:
+    metadata:
+      labels:
+        app: nestjs-chat-sample
+    spec:
+      initContainers:
+      - name: wait-for-redis
+        image: docker.io/bitnami/redis:7.2.0-debian-11-r0
+        imagePullPolicy: IfNotPresent
+        args: [ 'sh', '-c', 'until redis-cli  -h nestjs-chat-sample-redis-master.default.svc.cluster.local -p 6379  get hello; do echo "Waiting..."; sleep 1; done; echo "ready!"; ' ]
+      containers:
+      - name: nestjs-chat-sample
+        image: nestjs-chat-sample
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+        env:
+          - name: REDIS_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: nestjs-chat-sample-configuration
+                key: redis-host
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: nestjs-chat-sample-redis
+                key: redis-password
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nestjs-chat-sample-configuration
+  labels:
+    app: nestjs-chat-sample
+data:
+  redis-host: nestjs-chat-sample-redis-master
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nestjs-chat-sample-service
+  labels:
+    app: nestjs-chat-sample
+spec:
+  selector:
+    app: nestjs-chat-sample
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
