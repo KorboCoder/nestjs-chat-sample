@@ -7,3 +7,11 @@ services:
     command: redis-server
     ports:
       - 6379:6379
+  app:
+    image: nestjs-chat-sample
+    ports:
+      - 3000:3000
+    links:
+      - redis
+    environment: 
+      - REDIS_HOST=redis
